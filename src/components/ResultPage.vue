@@ -22,6 +22,11 @@
       </div>
     </div>
 
+    <!-- 广告位 1 -->
+    <div class="ad-slot">
+      <ins class="adsbygoogle" style="display:block" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    </div>
+
     <!-- ===== 人格解读 ===== -->
     <div class="section-card">
       <h2 class="section-title">该人格的简单解读</h2>
@@ -62,6 +67,11 @@
     <div class="section-card">
       <h2 class="section-title">你的维度模式</h2>
       <div class="pattern-display">{{ result.userPattern }}</div>
+    </div>
+
+    <!-- 广告位 2 -->
+    <div class="ad-slot">
+      <ins class="adsbygoogle" style="display:block" data-ad-format="auto" data-full-width-responsive="true"></ins>
     </div>
 
     <!-- ===== 匹配排行 ===== -->
@@ -138,7 +148,7 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick } from 'vue'
+import { computed, ref, nextTick, onMounted } from 'vue'
 import html2canvas from 'html2canvas'
 import RadarChart from './RadarChart.vue'
 import ResultCard from './ResultCard.vue'
@@ -158,6 +168,18 @@ const showSaveModal = ref(false)
 const showWxGuide = ref(false)
 const savedImageUrl = ref('')
 const radarImageUrl = ref('')
+
+// 初始化广告
+onMounted(() => {
+  try {
+    const ads = document.querySelectorAll('.adsbygoogle')
+    ads.forEach(ad => {
+      if (!ad.dataset.adsbygoogleStatus) {
+        (window.adsbygoogle = window.adsbygoogle || []).push({})
+      }
+    })
+  } catch (e) {}
+})
 
 const isWeChat = /MicroMessenger/i.test(navigator.userAgent)
 const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
@@ -570,6 +592,8 @@ async function handleShare() {
 .wx-guide-text { font-size: 18px; color: #fff; text-align: right; line-height: 1.8; margin-top: 12px; padding-right: 4px; }
 .wx-guide-text strong { color: #43e97b; }
 .wx-guide-dismiss { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); font-size: 14px; color: #888; }
+
+.ad-slot { margin-bottom: 16px; min-height: 100px; overflow: hidden; }
 
 .footer-disclaimer { text-align: center; font-size: 12px; color: var(--text-muted); line-height: 1.8; }
 
