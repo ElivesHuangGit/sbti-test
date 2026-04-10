@@ -22,8 +22,8 @@
       </div>
     </div>
 
-    <!-- 广告位 1 -->
-    <div class="ad-slot">
+    <!-- 广告位 -->
+    <div class="ad-slot" v-show="adsReady">
       <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2902494670421661" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
     </div>
 
@@ -178,16 +178,21 @@ const showWxGuide = ref(false)
 const savedImageUrl = ref('')
 const radarImageUrl = ref('')
 
-// 初始化广告
+// 广告
+const adsReady = ref(false)
 onMounted(() => {
-  try {
-    const ads = document.querySelectorAll('.adsbygoogle')
-    ads.forEach(ad => {
-      if (!ad.dataset.adsbygoogleStatus) {
-        (window.adsbygoogle = window.adsbygoogle || []).push({})
-      }
-    })
-  } catch (e) {}
+  // 检测 AdSense 是否加载成功
+  if (window.adsbygoogle && typeof window.adsbygoogle.push === 'function') {
+    adsReady.value = true
+    try {
+      const ads = document.querySelectorAll('.adsbygoogle')
+      ads.forEach(ad => {
+        if (!ad.dataset.adsbygoogleStatus) {
+          (window.adsbygoogle = window.adsbygoogle || []).push({})
+        }
+      })
+    } catch (e) {}
+  }
 })
 
 const isWeChat = /MicroMessenger/i.test(navigator.userAgent)

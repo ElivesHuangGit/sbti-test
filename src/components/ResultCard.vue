@@ -15,6 +15,11 @@
       <div class="card-match" v-if="matchText">{{ matchText }}</div>
     </div>
 
+    <div class="card-desc">
+      <div class="card-desc-title">人格解读</div>
+      <div class="card-desc-text">{{ result.type.desc }}</div>
+    </div>
+
     <div class="card-radar" v-if="radarImage">
       <img :src="radarImage" class="card-radar-img" />
     </div>
@@ -136,6 +141,16 @@ const dimGroups = computed(() => {
   display: inline-block; font-size: 12px; padding: 3px 14px; border-radius: 12px;
   background: #e6f0ea; color: #4a7c5e;
 }
+
+.card-desc {
+  background: #fff; border: 1px solid #e8e3dc; border-radius: 12px;
+  padding: 16px; margin-bottom: 16px;
+}
+.card-desc-title {
+  font-size: 13px; font-weight: 700; color: #4a7c5e;
+  margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e8e3dc;
+}
+.card-desc-text { font-size: 12px; line-height: 1.8; color: #2d2b28; }
 
 .card-radar { text-align: center; margin: 16px 0; }
 .card-radar-img { width: 260px; height: 260px; }
