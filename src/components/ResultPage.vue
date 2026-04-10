@@ -46,7 +46,7 @@
     <!-- 雷达图 -->
     <div class="section-card">
       <h2 class="section-title">维度雷达图</h2>
-      <RadarChart :data="radarData" :size="chartSize" />
+      <RadarChart ref="radarChartRef" :data="radarData" :size="chartSize" />
     </div>
 
     <!-- 维度详解 -->
@@ -54,7 +54,7 @@
       <h2 class="section-title">十五维度详解</h2>
       <div class="dimensions-list">
         <div
-          v-for="(item, idx) in dimensionExplanations"
+          v-for="item in dimensionExplanations"
           :key="item.dim"
           class="dim-item"
         >
@@ -86,13 +86,17 @@
       </div>
     </div>
 
-    <!-- 底部操作 -->
+    <!-- 底部操作按钮 -->
     <div class="bottom-actions">
-      <button class="restart-btn" @click="$emit('restart')">
-        重新测试
+      <button class="action-btn save-img-btn" @click="saveImage" :disabled="isSaving">
+        <span v-if="isSaving" class="btn-loading"></span>
+        <span v-else>{{ saveText }}</span>
       </button>
-      <button class="share-btn" @click="copyResult">
-        {{ copyText }}
+      <button class="action-btn share-btn" @click="handleShare">
+        分享好友
+      </button>
+      <button class="action-btn restart-btn" @click="$emit('restart')">
+        重新测试
       </button>
     </div>
 
@@ -100,12 +104,66 @@
       SBTI 人格测试仅供娱乐，请勿当真。<br>
       原创：B站 @蛆肉儿串儿
     </p>
+
+    <!-- 离屏渲染的保存卡片 -->
+    <div class="offscreen-area" v-if="showSaveCard">
+      <ResultCard
+        ref="resultCardRef"
+        :result="result"
+        :radar-image="radarImageUrl"
+        :test-url="testUrl"
+      />
+    </div>
+
+    <!-- 保存长图弹窗 -->
+    <Teleport to="body">
+      <div v-if="showSaveModal" class="save-modal-overlay" @click.self="showSaveModal = false">
+        <div class="save-modal">
+          <div class="save-modal-header">
+            <span class="save-modal-title">长按图片保存</span>
+            <button class="save-modal-close" @click="showSaveModal = false">&times;</button>
+          </div>
+          <div class="save-modal-body">
+            <img
+              v-if="savedImageUrl"
+              :src="savedImageUrl"
+              class="save-modal-img"
+              alt="SBTI测试结果"
+            />
+          </div>
+          <div class="save-modal-footer">
+            <p class="save-modal-hint" v-if="isMobile">长按上方图片 &rarr; 保存到相册</p>
+            <button v-else class="save-modal-download" @click="downloadImage">
+              下载图片
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- 微信分享引导 -->
+    <Teleport to="body">
+      <div v-if="showWxGuide" class="wx-guide-overlay" @click="showWxGuide = false">
+        <div class="wx-guide-arrow">
+          <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+            <path d="M30 50 L30 15 M30 15 L18 27 M30 15 L42 27" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="wx-guide-text">
+          点击右上角 <strong>「...」</strong><br>
+          选择「发送给朋友」或「分享到朋友圈」
+        </div>
+        <div class="wx-guide-dismiss">点击任意处关闭</div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
+import html2canvas from 'html2canvas'
 import RadarChart from './RadarChart.vue'
+import ResultCard from './ResultCard.vue'
 import { getDimensionExplanations } from '../engine/scoring.js'
 import { dimensionOrder, dimensions } from '../data/dimensions.js'
 
@@ -115,7 +173,25 @@ const props = defineProps({
 
 defineEmits(['restart'])
 
-const copyText = ref('复制结果')
+// Refs
+const radarChartRef = ref(null)
+const resultCardRef = ref(null)
+
+// 状态
+const isSaving = ref(false)
+const saveText = ref('保存长图')
+const showSaveCard = ref(false)
+const showSaveModal = ref(false)
+const showWxGuide = ref(false)
+const savedImageUrl = ref('')
+const radarImageUrl = ref('')
+
+// 环境检测
+const isWeChat = /MicroMessenger/i.test(navigator.userAgent)
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+// 测试地址
+const testUrl = computed(() => window.location.origin + window.location.pathname)
 
 const chartSize = computed(() => {
   if (typeof window !== 'undefined' && window.innerWidth < 400) return 300
@@ -139,15 +215,92 @@ const badgeClass = computed(() => {
   return 'badge-normal'
 })
 
-async function copyResult() {
-  const text = `我的SBTI人格测试结果：\n【${props.result.type.code}】${props.result.type.cn}\n"${props.result.type.intro}"\n维度模式：${props.result.userPattern}\n快来测测你的人格吧！`
+// ---- 保存长图 ----
+async function saveImage() {
+  if (isSaving.value) return
+  isSaving.value = true
+  saveText.value = '生成中...'
+
+  try {
+    // 1. 从雷达图 canvas 获取图片 dataURL
+    const radarCanvas = radarChartRef.value?.canvasRef
+    if (radarCanvas) {
+      radarImageUrl.value = radarCanvas.toDataURL('image/png')
+    }
+
+    // 2. 渲染离屏卡片
+    showSaveCard.value = true
+    await nextTick()
+    // 等一帧确保图片加载
+    await new Promise(r => setTimeout(r, 100))
+
+    // 3. 用 html2canvas 截图
+    const cardEl = resultCardRef.value?.$el
+    if (!cardEl) throw new Error('Card element not found')
+
+    const canvas = await html2canvas(cardEl, {
+      scale: 2,
+      backgroundColor: '#0f0f18',
+      useCORS: true,
+      logging: false
+    })
+
+    savedImageUrl.value = canvas.toDataURL('image/png')
+
+    // 4. 显示弹窗
+    showSaveModal.value = true
+    saveText.value = '保存长图'
+  } catch (e) {
+    console.error('Save image error:', e)
+    saveText.value = '生成失败'
+    setTimeout(() => { saveText.value = '保存长图' }, 2000)
+  } finally {
+    isSaving.value = false
+    showSaveCard.value = false
+  }
+}
+
+// 桌面端下载图片
+function downloadImage() {
+  if (!savedImageUrl.value) return
+  const link = document.createElement('a')
+  link.download = `SBTI-${props.result.type.code}-${props.result.type.cn}.png`
+  link.href = savedImageUrl.value
+  link.click()
+}
+
+// ---- 分享 ----
+async function handleShare() {
+  // 微信内置浏览器：显示引导
+  if (isWeChat) {
+    showWxGuide.value = true
+    return
+  }
+
+  // 支持 Web Share API 的浏览器（大部分手机浏览器）
+  const shareData = {
+    title: `我的SBTI人格：【${props.result.type.code}】${props.result.type.cn}`,
+    text: `"${props.result.type.intro}" - 快来测测你的SBTI人格吧！`,
+    url: window.location.href
+  }
+
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData)
+      return
+    } catch {
+      // 用户取消或不支持，回退到复制
+    }
+  }
+
+  // 兜底：复制分享文案
+  const text = `我的SBTI人格测试结果：\n【${props.result.type.code}】${props.result.type.cn}\n"${props.result.type.intro}"\n维度模式：${props.result.userPattern}\n快来测测你的人格吧！\n${window.location.href}`
   try {
     await navigator.clipboard.writeText(text)
-    copyText.value = '已复制!'
-    setTimeout(() => { copyText.value = '复制结果' }, 2000)
+    alert('分享文案已复制到剪贴板，去粘贴给好友吧！')
   } catch {
-    copyText.value = '复制失败'
-    setTimeout(() => { copyText.value = '复制结果' }, 2000)
+    // 剪贴板 API 不可用时手动选中
+    prompt('复制以下文案分享给好友：', text)
   }
 }
 </script>
@@ -305,20 +458,9 @@ async function copyResult() {
   border-radius: 10px;
 }
 
-.level-L {
-  background: rgba(245, 87, 108, 0.12);
-  color: #f5576c;
-}
-
-.level-M {
-  background: rgba(255, 184, 0, 0.12);
-  color: #e6a700;
-}
-
-.level-H {
-  background: rgba(0, 200, 150, 0.12);
-  color: #00c896;
-}
+.level-L { background: rgba(245, 87, 108, 0.12); color: #f5576c; }
+.level-M { background: rgba(255, 184, 0, 0.12); color: #e6a700; }
+.level-H { background: rgba(0, 200, 150, 0.12); color: #00c896; }
 
 .dim-model {
   font-size: 11px;
@@ -342,22 +484,9 @@ async function copyResult() {
   border-radius: 10px;
 }
 
-.secondary-code {
-  font-weight: 700;
-  color: #667eea;
-  font-size: 16px;
-}
-
-.secondary-name {
-  color: var(--text-primary);
-  font-size: 15px;
-}
-
-.secondary-sim {
-  margin-left: auto;
-  font-size: 13px;
-  color: var(--text-secondary);
-}
+.secondary-code { font-weight: 700; color: #667eea; font-size: 16px; }
+.secondary-name { color: var(--text-primary); font-size: 15px; }
+.secondary-sim { margin-left: auto; font-size: 13px; color: var(--text-secondary); }
 
 /* 排行 */
 .ranking-list {
@@ -381,74 +510,203 @@ async function copyResult() {
   background: rgba(102, 126, 234, 0.06);
 }
 
-.rank-num {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-muted);
-  width: 28px;
-}
+.rank-num { font-size: 13px; font-weight: 700; color: var(--text-muted); width: 28px; }
+.is-best .rank-num { color: #667eea; }
+.rank-code { font-weight: 700; color: #667eea; width: 70px; font-size: 14px; }
+.rank-name { flex: 1; font-size: 14px; color: var(--text-primary); }
+.rank-sim { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
 
-.is-best .rank-num {
-  color: #667eea;
-}
-
-.rank-code {
-  font-weight: 700;
-  color: #667eea;
-  width: 70px;
-  font-size: 14px;
-}
-
-.rank-name {
-  flex: 1;
-  font-size: 14px;
-  color: var(--text-primary);
-}
-
-.rank-sim {
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-weight: 600;
-}
-
-/* 底部操作 */
+/* ===== 底部操作按钮 ===== */
 .bottom-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   margin-top: 24px;
   margin-bottom: 24px;
 }
 
-.restart-btn, .share-btn {
+.action-btn {
   flex: 1;
-  padding: 14px;
-  font-size: 16px;
+  padding: 14px 8px;
+  font-size: 15px;
   font-weight: 600;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
+
+.save-img-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+}
+.save-img-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.save-img-btn:disabled { opacity: 0.6; cursor: wait; }
+
+.share-btn {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  color: #0a3d2a;
+}
+.share-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
 .restart-btn {
   background: var(--card-bg);
-  border: 2px solid var(--border-color);
+  border: 2px solid var(--border-color) !important;
   color: var(--text-primary);
 }
+.restart-btn:hover { border-color: #667eea !important; color: #667eea; }
 
-.restart-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
+.btn-loading {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
 }
 
-.share-btn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+/* ===== 离屏渲染区 ===== */
+.offscreen-area {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ===== 保存长图弹窗 ===== */
+.save-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.save-modal {
+  background: #1a1a24;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.save-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #2a2a3a;
+}
+
+.save-modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #e8e8f0;
+}
+
+.save-modal-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
   border: none;
-  color: #fff;
+  color: #9898a8;
+  font-size: 24px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.save-modal-close:hover { background: #2a2a3a; }
+
+.save-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  -webkit-overflow-scrolling: touch;
 }
 
-.share-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+.save-modal-img {
+  width: 100%;
+  max-width: 375px;
+  height: auto;
+  border-radius: 8px;
+}
+
+.save-modal-footer {
+  padding: 12px 20px 16px;
+  text-align: center;
+  border-top: 1px solid #2a2a3a;
+}
+
+.save-modal-hint {
+  font-size: 14px;
+  color: #9898a8;
+}
+
+.save-modal-download {
+  padding: 10px 32px;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.save-modal-download:hover { opacity: 0.9; }
+
+/* ===== 微信分享引导 ===== */
+.wx-guide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  padding-top: 16px;
+  padding-right: 20px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.wx-guide-arrow {
+  animation: bounceUp 1s ease-in-out infinite;
+}
+
+.wx-guide-text {
+  font-size: 18px;
+  color: #fff;
+  text-align: right;
+  line-height: 1.8;
+  margin-top: 12px;
+  padding-right: 4px;
+}
+
+.wx-guide-text strong {
+  color: #43e97b;
+}
+
+.wx-guide-dismiss {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: #888;
 }
 
 .footer-disclaimer {
@@ -458,6 +716,7 @@ async function copyResult() {
   line-height: 1.8;
 }
 
+/* ===== Animations ===== */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -466,5 +725,33 @@ async function copyResult() {
 @keyframes popIn {
   from { opacity: 0; transform: scale(0.5); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounceUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 420px) {
+  .bottom-actions {
+    flex-wrap: wrap;
+  }
+  .save-img-btn,
+  .share-btn {
+    flex: 1 1 45%;
+  }
+  .restart-btn {
+    flex: 1 1 100%;
+  }
 }
 </style>

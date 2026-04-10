@@ -129,6 +129,8 @@ function draw() {
 
 onMounted(draw)
 watch(() => props.data, draw, { deep: true })
+
+defineExpose({ canvasRef })
 </script>
 
 <style scoped>
