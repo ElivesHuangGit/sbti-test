@@ -33,15 +33,21 @@
     </div>
 
     <div class="card-footer">
-      <div class="card-cta">快来测测你的 SBTI 人格吧!</div>
-      <div class="card-url">{{ testUrl }}</div>
-      <div class="card-disclaimer">仅供娱乐 请勿当真 | 原创: B站 @蛆肉儿串儿</div>
+      <div class="card-footer-left">
+        <div class="card-cta">快来测测你的 SBTI 人格吧!</div>
+        <div class="card-disclaimer">仅供娱乐 请勿当真</div>
+      </div>
+      <div class="card-qr">
+        <canvas ref="qrCanvasRef"></canvas>
+        <div class="card-qr-hint">扫码测试</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
+import QRCode from 'qrcode'
 import { dimensionOrder } from '../data/dimensions.js'
 import { typeEmojis } from '../data/typeEmojis.js'
 
@@ -51,7 +57,21 @@ const props = defineProps({
   testUrl: { type: String, default: '' }
 })
 
+const qrCanvasRef = ref(null)
+
 const emoji = computed(() => typeEmojis[props.result.type.code] || '🧩')
+
+function renderQR() {
+  if (!qrCanvasRef.value || !props.testUrl) return
+  QRCode.toCanvas(qrCanvasRef.value, props.testUrl, {
+    width: 80,
+    margin: 1,
+    color: { dark: '#2d2b28', light: '#f8f6f3' }
+  }).catch(() => {})
+}
+
+onMounted(renderQR)
+watch(() => props.testUrl, renderQR)
 
 const badgeClass = computed(() => {
   if (props.result.isDrunk) return 'badge-drunk'
@@ -138,8 +158,14 @@ const dimGroups = computed(() => {
 .pill-M { background: #fef6e0; color: #b8920a; }
 .pill-H { background: #e6f0ea; color: #4a7c5e; }
 
-.card-footer { text-align: center; padding-top: 18px; border-top: 1px solid #e8e3dc; }
+.card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 18px; border-top: 1px solid #e8e3dc; gap: 12px;
+}
+.card-footer-left { flex: 1; }
 .card-cta { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
-.card-url { font-size: 11px; color: #4a7c5e; margin-bottom: 6px; word-break: break-all; }
 .card-disclaimer { font-size: 10px; color: #a09a92; }
+.card-qr { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+.card-qr canvas { border-radius: 6px; }
+.card-qr-hint { font-size: 10px; color: #a09a92; margin-top: 4px; }
 </style>
