@@ -24,7 +24,7 @@
 
     <!-- 广告位 1 -->
     <div class="ad-slot">
-      <ins class="adsbygoogle" style="display:block" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2902494670421661" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
     </div>
 
     <!-- ===== 人格解读 ===== -->
@@ -71,7 +71,7 @@
 
     <!-- 广告位 2 -->
     <div class="ad-slot">
-      <ins class="adsbygoogle" style="display:block" data-ad-format="auto" data-full-width-responsive="true"></ins>
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2902494670421661" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
     </div>
 
     <!-- ===== 匹配排行 ===== -->
