@@ -47,7 +47,7 @@ function draw() {
       else ctx.lineTo(x, y)
     }
     ctx.closePath()
-    ctx.strokeStyle = 'rgba(102, 126, 234, 0.15)'
+    ctx.strokeStyle = 'rgba(74, 124, 94, 0.15)'
     ctx.lineWidth = 1
     ctx.stroke()
   }
@@ -58,7 +58,7 @@ function draw() {
     ctx.beginPath()
     ctx.moveTo(cx, cy)
     ctx.lineTo(cx + maxR * Math.cos(angle), cy + maxR * Math.sin(angle))
-    ctx.strokeStyle = 'rgba(102, 126, 234, 0.1)'
+    ctx.strokeStyle = 'rgba(74, 124, 94, 0.1)'
     ctx.lineWidth = 1
     ctx.stroke()
   }
@@ -76,9 +76,9 @@ function draw() {
     else ctx.lineTo(x, y)
   }
   ctx.closePath()
-  ctx.fillStyle = 'rgba(102, 126, 234, 0.2)'
+  ctx.fillStyle = 'rgba(74, 124, 94, 0.2)'
   ctx.fill()
-  ctx.strokeStyle = '#667eea'
+  ctx.strokeStyle = '#4a7c5e'
   ctx.lineWidth = 2
   ctx.stroke()
 
@@ -91,7 +91,7 @@ function draw() {
     const y = cy + r * Math.sin(angle)
     ctx.beginPath()
     ctx.arc(x, y, 4, 0, Math.PI * 2)
-    ctx.fillStyle = '#667eea'
+    ctx.fillStyle = '#4a7c5e'
     ctx.fill()
     ctx.strokeStyle = '#fff'
     ctx.lineWidth = 2
@@ -115,7 +115,7 @@ function draw() {
     const parts = shortName.split('\n')
 
     if (parts.length > 1) {
-      ctx.fillStyle = '#667eea'
+      ctx.fillStyle = '#4a7c5e'
       ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, sans-serif'
       ctx.fillText(parts[0], x, y - 7)
       ctx.fillStyle = '#888'

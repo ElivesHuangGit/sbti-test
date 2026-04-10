@@ -77,7 +77,7 @@ defineEmits(['start'])
   font-size: 72px;
   font-weight: 900;
   letter-spacing: 8px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -150,9 +150,9 @@ defineEmits(['start'])
   font-size: 12px;
   padding: 4px 12px;
   border-radius: 12px;
-  background: rgba(102, 126, 234, 0.15);
-  color: #667eea;
-  border: 1px solid rgba(102, 126, 234, 0.3);
+  background: var(--accent-light);
+  color: var(--accent);
+  border: 1px solid rgba(74, 124, 94, 0.25);
 }
 
 .start-btn {
@@ -163,18 +163,18 @@ defineEmits(['start'])
   font-size: 18px;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--accent-gradient);
   border: none;
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 20px rgba(74, 124, 94, 0.3);
   margin-bottom: 24px;
 }
 
 .start-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 28px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 28px rgba(74, 124, 94, 0.4);
 }
 
 .start-btn:active {

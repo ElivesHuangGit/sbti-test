@@ -1,13 +1,12 @@
 <template>
   <div class="save-card" ref="cardRef">
-    <!-- 头部 -->
     <div class="card-header">
       <div class="card-logo">SBTI</div>
       <div class="card-tagline">人格测试结果</div>
     </div>
 
-    <!-- 人格徽章 -->
     <div class="card-type-section">
+      <div class="card-emoji">{{ emoji }}</div>
       <div class="card-badge" :class="badgeClass">
         <span>{{ result.type.code }}</span>
       </div>
@@ -16,30 +15,23 @@
       <div class="card-match" v-if="matchText">{{ matchText }}</div>
     </div>
 
-    <!-- 雷达图 -->
     <div class="card-radar" v-if="radarImage">
       <img :src="radarImage" class="card-radar-img" />
     </div>
 
-    <!-- 维度模式 -->
     <div class="card-pattern">{{ result.userPattern }}</div>
 
-    <!-- 维度一览 -->
     <div class="card-dims">
       <div v-for="group in dimGroups" :key="group.model" class="card-dim-group">
         <div class="card-dim-model">{{ group.model }}</div>
         <div class="card-dim-pills">
-          <span
-            v-for="d in group.dims"
-            :key="d.dim"
-            class="card-dim-pill"
-            :class="'pill-' + d.level"
-          >{{ d.dim }} {{ d.level }}</span>
+          <span v-for="d in group.dims" :key="d.dim" class="card-dim-pill" :class="'pill-' + d.level">
+            {{ d.dim }} {{ d.level }}
+          </span>
         </div>
       </div>
     </div>
 
-    <!-- 底部 -->
     <div class="card-footer">
       <div class="card-cta">快来测测你的 SBTI 人格吧!</div>
       <div class="card-url">{{ testUrl }}</div>
@@ -51,12 +43,15 @@
 <script setup>
 import { computed } from 'vue'
 import { dimensionOrder } from '../data/dimensions.js'
+import { typeEmojis } from '../data/typeEmojis.js'
 
 const props = defineProps({
   result: { type: Object, required: true },
   radarImage: { type: String, default: '' },
   testUrl: { type: String, default: '' }
 })
+
+const emoji = computed(() => typeEmojis[props.result.type.code] || '🧩')
 
 const badgeClass = computed(() => {
   if (props.result.isDrunk) return 'badge-drunk'
@@ -81,199 +76,70 @@ const dimGroups = computed(() => {
   ]
   return groups.map(g => ({
     model: g.model,
-    dims: g.dims.map(d => ({
-      dim: d,
-      level: props.result.levels[d]
-    }))
+    dims: g.dims.map(d => ({ dim: d, level: props.result.levels[d] }))
   }))
 })
 </script>
 
 <style scoped>
-/* 使用硬编码颜色，确保 html2canvas 正确渲染 */
 .save-card {
   width: 375px;
-  background: linear-gradient(180deg, #0f0f18 0%, #161625 50%, #0f0f18 100%);
-  color: #e8e8f0;
+  background: #f8f6f3;
+  color: #2d2b28;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   padding: 32px 24px;
   box-sizing: border-box;
 }
 
-/* 头部 */
-.card-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
+.card-header { text-align: center; margin-bottom: 24px; }
 .card-logo {
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: 6px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.2;
+  font-size: 36px; font-weight: 900; letter-spacing: 6px;
+  color: #4a7c5e; line-height: 1.2;
 }
+.card-tagline { font-size: 13px; color: #a09a92; letter-spacing: 3px; margin-top: 4px; }
 
-.card-tagline {
-  font-size: 13px;
-  color: #7a7a8e;
-  letter-spacing: 3px;
-  margin-top: 4px;
-}
-
-/* 人格徽章 */
-.card-type-section {
-  text-align: center;
-  margin-bottom: 24px;
-}
-
+.card-type-section { text-align: center; margin-bottom: 20px; }
+.card-emoji { font-size: 64px; line-height: 1; margin-bottom: 12px; }
 .card-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  margin-bottom: 14px;
-  font-size: 20px;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: 1px;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 72px; height: 72px; border-radius: 50%;
+  margin-bottom: 12px; font-size: 16px; font-weight: 900; color: #fff; letter-spacing: 1px;
 }
+.badge-normal { background: linear-gradient(135deg, #4a7c5e, #3a8a6a); }
+.badge-drunk { background: linear-gradient(135deg, #e8a849, #d4903a); }
+.badge-hhhh { background: linear-gradient(135deg, #5ba4cf, #4a8cb8); }
 
-.badge-normal {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-.badge-drunk {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-.badge-hhhh {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.card-type-name {
-  font-size: 28px;
-  font-weight: 800;
-  margin-bottom: 6px;
-}
-
-.card-intro {
-  font-size: 14px;
-  color: #9898a8;
-  font-style: italic;
-  margin-bottom: 8px;
-  padding: 0 12px;
-}
-
+.card-type-name { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+.card-intro { font-size: 13px; color: #6b6862; font-style: italic; margin-bottom: 8px; padding: 0 12px; }
 .card-match {
-  display: inline-block;
-  font-size: 12px;
-  padding: 3px 14px;
-  border-radius: 12px;
-  background: rgba(102, 126, 234, 0.15);
-  color: #667eea;
+  display: inline-block; font-size: 12px; padding: 3px 14px; border-radius: 12px;
+  background: #e6f0ea; color: #4a7c5e;
 }
 
-/* 雷达图 */
-.card-radar {
-  text-align: center;
-  margin: 16px 0;
-}
+.card-radar { text-align: center; margin: 16px 0; }
+.card-radar-img { width: 260px; height: 260px; }
 
-.card-radar-img {
-  width: 280px;
-  height: 280px;
-}
-
-/* 维度模式 */
 .card-pattern {
-  font-family: 'Courier New', monospace;
-  font-size: 18px;
-  font-weight: 700;
-  text-align: center;
-  color: #667eea;
-  letter-spacing: 2px;
-  padding: 12px;
-  background: rgba(102, 126, 234, 0.08);
-  border-radius: 10px;
-  margin-bottom: 20px;
+  font-family: 'Courier New', monospace; font-size: 16px; font-weight: 700;
+  text-align: center; color: #4a7c5e; letter-spacing: 2px;
+  padding: 10px; background: #e6f0ea; border-radius: 10px; margin-bottom: 18px;
 }
 
-/* 维度一览 */
-.card-dims {
-  margin-bottom: 24px;
-}
-
-.card-dim-group {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.card-dim-model {
-  font-size: 11px;
-  color: #7a7a8e;
-  width: 60px;
-  flex-shrink: 0;
-  text-align: right;
-}
-
-.card-dim-pills {
-  display: flex;
-  gap: 6px;
-  flex: 1;
-}
-
+.card-dims { margin-bottom: 20px; }
+.card-dim-group { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+.card-dim-model { font-size: 11px; color: #a09a92; width: 56px; flex-shrink: 0; text-align: right; }
+.card-dim-pills { display: flex; gap: 5px; flex: 1; }
 .card-dim-pill {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 8px;
-  flex: 1;
-  text-align: center;
+  font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;
+  flex: 1; text-align: center;
 }
+.pill-L { background: #fce8e6; color: #c0614e; }
+.pill-M { background: #fef6e0; color: #b8920a; }
+.pill-H { background: #e6f0ea; color: #4a7c5e; }
 
-.pill-L {
-  background: rgba(245, 87, 108, 0.15);
-  color: #f5576c;
-}
-.pill-M {
-  background: rgba(255, 184, 0, 0.15);
-  color: #e6a700;
-}
-.pill-H {
-  background: rgba(0, 200, 150, 0.15);
-  color: #00c896;
-}
-
-/* 底部 */
-.card-footer {
-  text-align: center;
-  padding-top: 20px;
-  border-top: 1px solid #2a2a3a;
-}
-
-.card-cta {
-  font-size: 14px;
-  font-weight: 600;
-  color: #e8e8f0;
-  margin-bottom: 6px;
-}
-
-.card-url {
-  font-size: 12px;
-  color: #667eea;
-  margin-bottom: 8px;
-  word-break: break-all;
-}
-
-.card-disclaimer {
-  font-size: 10px;
-  color: #5a5a6e;
-}
+.card-footer { text-align: center; padding-top: 18px; border-top: 1px solid #e8e3dc; }
+.card-cta { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.card-url { font-size: 11px; color: #4a7c5e; margin-bottom: 6px; word-break: break-all; }
+.card-disclaimer { font-size: 10px; color: #a09a92; }
 </style>

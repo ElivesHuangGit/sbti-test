@@ -191,7 +191,7 @@ function finishTest() {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: var(--accent-gradient);
   border-radius: 3px;
   transition: width 0.4s ease;
 }
@@ -209,8 +209,8 @@ function finishTest() {
   display: inline-block;
   font-size: 13px;
   font-weight: 700;
-  color: #667eea;
-  background: rgba(102, 126, 234, 0.12);
+  color: var(--accent);
+  background: var(--accent-light);
   padding: 4px 12px;
   border-radius: 12px;
   margin-bottom: 16px;
@@ -247,13 +247,13 @@ function finishTest() {
 }
 
 .option-btn:hover {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.05);
+  border-color: var(--accent);
+  background: rgba(74, 124, 94, 0.05);
 }
 
 .option-btn.selected {
-  border-color: #667eea;
-  background: rgba(102, 126, 234, 0.12);
+  border-color: var(--accent);
+  background: var(--accent-light);
 }
 
 .option-label {
@@ -272,7 +272,7 @@ function finishTest() {
 }
 
 .option-btn.selected .option-label {
-  background: #667eea;
+  background: var(--accent);
   color: #fff;
 }
 
@@ -301,8 +301,8 @@ function finishTest() {
 }
 
 .nav-btn:hover:not(:disabled) {
-  border-color: #667eea;
-  color: #667eea;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .nav-btn:disabled {
