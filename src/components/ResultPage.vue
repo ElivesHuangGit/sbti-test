@@ -92,6 +92,15 @@
       </div>
     </div>
 
+    <!-- ===== 邀请好友 ===== -->
+    <div class="invite-card">
+      <div class="invite-text">你的好友是什么抽象人格？</div>
+      <div class="invite-sub">分享给 TA 测一测，看看你们匹配度如何</div>
+      <div class="invite-actions">
+        <button class="invite-btn" @click="copyLink">复制链接发给好友</button>
+      </div>
+    </div>
+
     <!-- ===== 底部操作 ===== -->
     <div class="bottom-actions">
       <button class="action-btn save-img-btn" @click="saveImage" :disabled="isSaving">
@@ -228,6 +237,7 @@ async function saveImage() {
   if (isSaving.value) return
   isSaving.value = true
   saveText.value = '生成中...'
+  trackEvent('save_image', props.result.type.code)
   try {
     const radarCanvas = radarChartRef.value?.canvasRef
     if (radarCanvas) radarImageUrl.value = radarCanvas.toDataURL('image/png')
@@ -266,8 +276,30 @@ function downloadImage() {
   link.click()
 }
 
+// ---- GA 事件追踪 ----
+function trackEvent(action, label) {
+  if (window.gtag) window.gtag('event', action, { event_category: 'sbti', event_label: label })
+}
+
+// 页面加载时追踪结果
+onMounted(() => {
+  trackEvent('view_result', props.result.type.code)
+})
+
+// ---- 复制链接 ----
+async function copyLink() {
+  trackEvent('copy_link', props.result.type.code)
+  try {
+    await navigator.clipboard.writeText('SBTI人格测试，快来测测你是什么抽象人格！' + '\n' + window.location.origin)
+    alert('链接已复制，快去分享给好友吧！')
+  } catch {
+    prompt('复制链接分享给好友：', window.location.origin)
+  }
+}
+
 // ---- 分享 ----
 async function handleShare() {
+  trackEvent('share', props.result.type.code)
   if (isWeChat) { showWxGuide.value = true; return }
   const shareData = {
     title: `我的SBTI人格：【${props.result.type.code}】${props.result.type.cn}`,
@@ -592,6 +624,24 @@ async function handleShare() {
 .wx-guide-text { font-size: 18px; color: #fff; text-align: right; line-height: 1.8; margin-top: 12px; padding-right: 4px; }
 .wx-guide-text strong { color: #43e97b; }
 .wx-guide-dismiss { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); font-size: 14px; color: #888; }
+
+/* ===== 邀请好友卡片 ===== */
+.invite-card {
+  text-align: center;
+  background: var(--accent-gradient);
+  border-radius: 16px;
+  padding: 28px 24px;
+  margin-bottom: 16px;
+  color: #fff;
+}
+.invite-text { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.invite-sub { font-size: 13px; opacity: 0.85; margin-bottom: 18px; }
+.invite-btn {
+  padding: 12px 32px; font-size: 15px; font-weight: 600;
+  background: #fff; color: var(--accent); border: none; border-radius: 50px;
+  cursor: pointer; transition: all 0.2s;
+}
+.invite-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
 
 .ad-slot { margin-bottom: 16px; min-height: 100px; overflow: hidden; }
 
