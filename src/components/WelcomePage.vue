@@ -180,12 +180,13 @@ onMounted(() => {
 }
 
 .test-count {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   font-size: 13px;
   color: var(--text-secondary);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 .test-count strong { color: var(--accent); }
 .count-dot {
