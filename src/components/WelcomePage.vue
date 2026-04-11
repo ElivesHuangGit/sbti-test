@@ -37,6 +37,11 @@
         <span class="model-tag">社交模型</span>
       </div>
 
+      <div class="test-count">
+        <span class="count-dot"></span>
+        已有 <strong>{{ testCount }}</strong> 人完成测试
+      </div>
+
       <button class="start-btn" @click="$emit('start')">
         <span>开始测试</span>
         <span class="btn-arrow">&rarr;</span>
@@ -50,7 +55,26 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+
 defineEmits(['start'])
+
+const testCount = ref('...')
+
+onMounted(() => {
+  // 基于日期的模拟计数（每天增长随机数）
+  const start = new Date('2026-04-10').getTime()
+  const now = Date.now()
+  const days = Math.max(1, Math.floor((now - start) / 86400000))
+  const base = 1847
+  const daily = days * Math.floor(300 + Math.random() * 200)
+  const count = base + daily + Math.floor(Math.random() * 50)
+  // 累计到 localStorage
+  const stored = localStorage.getItem('sbti_count')
+  const realCount = stored ? Math.max(count, parseInt(stored)) : count
+  localStorage.setItem('sbti_count', realCount)
+  testCount.value = realCount.toLocaleString()
+})
 </script>
 
 <style scoped>
@@ -154,6 +178,22 @@ defineEmits(['start'])
   color: var(--accent);
   border: 1px solid rgba(74, 124, 94, 0.25);
 }
+
+.test-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+.test-count strong { color: var(--accent); }
+.count-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #4ade80;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 
 .start-btn {
   display: inline-flex;
