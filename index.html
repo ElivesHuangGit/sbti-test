@@ -24,32 +24,42 @@
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>" />
-
-  <!-- Google Analytics - 替换 G-4BHNHRSBCX 为你的 Measurement ID -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-4BHNHRSBCX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-4BHNHRSBCX');
-  </script>
-
-  <!-- 百度统计 - 替换 BAIDU_ID 为你的百度统计 ID -->
-  <script>
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "https://hm.baidu.com/hm.js?aa265968e8369f9a7e14d71990bb2c25";
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-  </script>
-
-  <!-- Google AdSense - 替换 ca-pub-2902494670421661 为你的 Publisher ID -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2902494670421661" crossorigin="anonymous"></script>
 </head>
 <body>
   <div id="app"></div>
   <script type="module" src="/src/main.js"></script>
+
+  <!-- 所有统计和广告脚本延迟到页面渲染完成后加载，避免阻塞首屏 -->
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        // 百度统计（国内优先加载）
+        var _hmt = window._hmt = window._hmt || [];
+        var hm = document.createElement('script');
+        hm.src = 'https://hm.baidu.com/hm.js?aa265968e8369f9a7e14d71990bb2c25';
+        document.head.appendChild(hm);
+
+        // Google Analytics（延迟加载，避免在国内阻塞）
+        var ga = document.createElement('script');
+        ga.src = 'https://www.googletagmanager.com/gtag/js?id=G-4BHNHRSBCX';
+        ga.async = true;
+        ga.onload = function() {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = gtag;
+          gtag('js', new Date());
+          gtag('config', 'G-4BHNHRSBCX');
+        };
+        document.head.appendChild(ga);
+
+        // Google AdSense（延迟加载）
+        var ads = document.createElement('script');
+        ads.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2902494670421661';
+        ads.async = true;
+        ads.crossOrigin = 'anonymous';
+        document.head.appendChild(ads);
+      }, 1500);
+    });
+  </script>
 </body>
 </html>
