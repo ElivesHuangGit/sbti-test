@@ -120,7 +120,7 @@
       <div class="tip-text">感谢支持！扫码打赏 ❤️</div>
       <div class="tip-qr-row">
         <div class="tip-qr-item">
-          <img src="/tip-wechat.jpg?v=3" class="tip-qr-img" alt="微信赞赏" />
+          <img src="/tip-wechat.jpg?v=4" class="tip-qr-img" alt="微信赞赏" />
           <span>微信</span>
         </div>
         <div class="tip-qr-item">
@@ -687,7 +687,7 @@ async function handleShare() {
 .tip-btn:hover { transform: translateY(-1px); opacity: 0.9; }
 .tip-qr-row { display: flex; justify-content: center; gap: 32px; margin-bottom: 14px; }
 .tip-qr-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
-.tip-qr-img { width: 180px; height: 180px; border-radius: 8px; border: 1px solid var(--border-color); object-fit: contain; }
+.tip-qr-img { width: 220px; height: 220px; border-radius: 8px; border: 1px solid var(--border-color); object-fit: contain; }
 .tip-close {
   font-size: 13px; color: var(--text-muted); background: none; border: none; cursor: pointer;
   text-decoration: underline;
