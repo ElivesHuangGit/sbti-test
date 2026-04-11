@@ -117,15 +117,15 @@
       <button class="tip-btn" @click="showTipQR = true">打赏支持</button>
     </div>
     <div class="tip-card tip-qr-card" v-else>
-      <div class="tip-text">感谢支持！扫码打赏 ❤️</div>
+      <div class="tip-text">感谢支持！长按识别二维码打赏 ❤️</div>
       <div class="tip-qr-row">
         <div class="tip-qr-item">
-          <img src="/tip-wechat.jpg?v=4" class="tip-qr-img" alt="微信赞赏" />
-          <span>微信</span>
+          <span class="tip-qr-label">微信赞赏</span>
+          <img src="/tip-wechat.jpg?v=5" class="tip-qr-img" alt="微信赞赏" />
         </div>
         <div class="tip-qr-item">
-          <img src="/tip-alipay.jpg" class="tip-qr-img" alt="支付宝赞赏" />
-          <span>支付宝</span>
+          <span class="tip-qr-label">支付宝</span>
+          <img src="/tip-alipay.jpg?v=2" class="tip-qr-img" alt="支付宝赞赏" />
         </div>
       </div>
       <button class="tip-close" @click="showTipQR = false">收起</button>
@@ -678,16 +678,17 @@ async function handleShare() {
   padding: 20px 24px;
   margin-bottom: 16px;
 }
-.tip-text { font-size: 15px; color: var(--text-primary); margin-bottom: 14px; }
+.tip-text { font-size: 14px; color: var(--text-primary); margin-bottom: 16px; }
 .tip-btn {
   padding: 10px 32px; font-size: 14px; font-weight: 600;
   background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;
   border: none; border-radius: 50px; cursor: pointer; transition: all 0.2s;
 }
 .tip-btn:hover { transform: translateY(-1px); opacity: 0.9; }
-.tip-qr-row { display: flex; justify-content: center; gap: 32px; margin-bottom: 14px; }
-.tip-qr-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
-.tip-qr-img { width: 220px; height: 220px; border-radius: 8px; border: 1px solid var(--border-color); object-fit: contain; }
+.tip-qr-row { display: flex; justify-content: center; gap: 20px; margin-bottom: 14px; }
+.tip-qr-item { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; max-width: 160px; }
+.tip-qr-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+.tip-qr-img { width: 100%; aspect-ratio: 1; border-radius: 10px; border: 1px solid var(--border-color); object-fit: contain; background: #fff; }
 .tip-close {
   font-size: 13px; color: var(--text-muted); background: none; border: none; cursor: pointer;
   text-decoration: underline;
