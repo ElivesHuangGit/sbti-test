@@ -111,6 +111,26 @@
       <button class="action-btn restart-btn" @click="$emit('restart')">重新测试</button>
     </div>
 
+    <!-- 赞赏区 -->
+    <div class="tip-card" v-if="!showTipQR">
+      <div class="tip-text">觉得好玩？请作者喝杯咖啡 ☕</div>
+      <button class="tip-btn" @click="showTipQR = true">打赏支持</button>
+    </div>
+    <div class="tip-card tip-qr-card" v-else>
+      <div class="tip-text">感谢支持！扫码打赏 ❤️</div>
+      <div class="tip-qr-row">
+        <div class="tip-qr-item">
+          <img src="/tip-wechat.jpg" class="tip-qr-img" alt="微信赞赏" />
+          <span>微信</span>
+        </div>
+        <div class="tip-qr-item">
+          <img src="/tip-alipay.jpg" class="tip-qr-img" alt="支付宝赞赏" />
+          <span>支付宝</span>
+        </div>
+      </div>
+      <button class="tip-close" @click="showTipQR = false">收起</button>
+    </div>
+
     <p class="footer-disclaimer">
       SBTI 人格测试仅供娱乐，请勿当真。<br>原创：B站 @蛆肉儿串儿
     </p>
@@ -175,6 +195,7 @@ const saveText = ref('保存长图')
 const showSaveCard = ref(false)
 const showSaveModal = ref(false)
 const showWxGuide = ref(false)
+const showTipQR = ref(false)
 const savedImageUrl = ref('')
 const radarImageUrl = ref('')
 
@@ -647,6 +668,30 @@ async function handleShare() {
   cursor: pointer; transition: all 0.2s;
 }
 .invite-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+
+/* ===== 打赏区 ===== */
+.tip-card {
+  text-align: center;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.tip-text { font-size: 15px; color: var(--text-primary); margin-bottom: 14px; }
+.tip-btn {
+  padding: 10px 32px; font-size: 14px; font-weight: 600;
+  background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff;
+  border: none; border-radius: 50px; cursor: pointer; transition: all 0.2s;
+}
+.tip-btn:hover { transform: translateY(-1px); opacity: 0.9; }
+.tip-qr-row { display: flex; justify-content: center; gap: 32px; margin-bottom: 14px; }
+.tip-qr-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
+.tip-qr-img { width: 140px; height: 140px; border-radius: 8px; border: 1px solid var(--border-color); }
+.tip-close {
+  font-size: 13px; color: var(--text-muted); background: none; border: none; cursor: pointer;
+  text-decoration: underline;
+}
 
 .ad-slot { margin-bottom: 16px; min-height: 100px; overflow: hidden; }
 
