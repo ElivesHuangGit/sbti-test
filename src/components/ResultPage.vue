@@ -120,7 +120,7 @@
       <div class="tip-text">感谢支持！扫码打赏 ❤️</div>
       <div class="tip-qr-row">
         <div class="tip-qr-item">
-          <img src="/tip-wechat.jpg" class="tip-qr-img" alt="微信赞赏" />
+          <img src="/tip-wechat.jpg?v=2" class="tip-qr-img" alt="微信赞赏" />
           <span>微信</span>
         </div>
         <div class="tip-qr-item">

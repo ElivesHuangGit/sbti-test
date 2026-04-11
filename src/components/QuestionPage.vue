@@ -202,7 +202,7 @@ function finishTest() {
   border-radius: 16px;
   padding: 32px 24px;
   margin-top: 24px;
-  animation: fadeIn 0.3s ease-out;
+  animation: slideIn 0.2s ease-out;
 }
 
 .question-number {
@@ -310,10 +310,10 @@ function finishTest() {
   cursor: not-allowed;
 }
 
-@keyframes fadeIn {
+@keyframes slideIn {
   from {
-    opacity: 0;
-    transform: translateX(20px);
+    opacity: 0.6;
+    transform: translateX(8px);
   }
   to {
     opacity: 1;
